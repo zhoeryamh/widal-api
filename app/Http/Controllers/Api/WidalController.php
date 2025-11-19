@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 // Models
-use App\Models\EncryptLog;
-use App\Models\DecryptLog;
+// use App\Models\EncryptLog;
+// use App\Models\DecryptLog;
 
 // Services
 use App\Services\WidalService;
@@ -44,11 +44,11 @@ class WidalController extends Controller
                 'result' => $out,
                 'mode' => $mode,
             ];
-            EncryptLog::create([
-                'text' => $text,
-                'result' => $out,
-                'mode' => $mode,
-            ]);
+            // EncryptLog::create([
+            //     'text' => $text,
+            //     'result' => $out,
+            //     'mode' => $mode,
+            // ]);
 
             return response()->json($payload);
         } elseif ($mode === 'from_widal') {
@@ -58,11 +58,11 @@ class WidalController extends Controller
                 'result' => $out,
                 'mode' => $mode,
             ];
-            DecryptLog::create([
-                'text' => $text,
-                'result' => $out,
-                'mode' => $mode,
-            ]);
+            // DecryptLog::create([
+            //     'text' => $text,
+            //     'result' => $out,
+            //     'mode' => $mode,
+            // ]);
 
             return response()->json($payload);
         }
