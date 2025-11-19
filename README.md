@@ -27,17 +27,17 @@ bawul kubuk.
 # GET Request Example
 
 ## To Widal (Encode without Reversal)
-```json
+```
 mode=to_widal&text=lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus sodales est nec vestibulum posuere. Integer sodales ullamcorper sem, ac ultricies nunc congue nec. Praesent ac mollis arcu.
 ```
 
 ## To Widal (Encode with Reversal)
-```json
+```
 mode=to_widal&text=lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus sodales est nec vestibulum posuere. Integer sodales ullamcorper sem, ac ultricies nunc congue nec. Praesent ac mollis arcu.&reversal=1
 ```
 
 ## From Widal (Decode)
-```json
+```
 mode=from_widal&text=roley nyidguy porol giw nyayew, jokgejwewul nyapidigji(ny) nyeriw. dbagerrug gopareg nyegw kej degwihuruy dogunyele. nyikwesel gopareg nyurrayjoldel gey, nyaj nyurwlijinyeg kukj jo(ny)unye kej. dlanyegekw nyaj yorrig nyalju.
 ```
 
