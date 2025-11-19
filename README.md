@@ -66,3 +66,19 @@ mode=from_widal&text=roley nyidguy porol giw nyayew, jokgejwewul nyapidigji(ny) 
     "mode": "from_widal"
 }
 ```
+
+# Deployment
+
+## Laravel
+1. Clone repository
+```bash
+git clone https://github.com/yourusername/widal-api.git
+```
+2. Install dependencies
+```bash
+composer install
+```
+3. Run server
+```bash
+php artisan serve
+```
