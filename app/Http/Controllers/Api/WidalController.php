@@ -28,25 +28,27 @@ class WidalController extends Controller
         $data = $request->validate([
             'text' => ['required', 'string'],
             'mode' => ['required', Rule::in(['to_widal', 'from_widal'])],
+            'reversal' => ['sometimes', 'boolean'],
         ]);
 
         // Ekstrak data
         $text = $data['text'];
         $mode = $data['mode'];
+        $reversal = $data['reversal'] ?? false;
 
         // Transformasi ke Widal
         if ($mode === 'to_widal') {
-            $out = $this->widal->encode($text);
+            $out = $this->widal->encode($text, $reversal);
 
             $payload = [
                 'result' => $out,
                 'mode' => $mode,
             ];
-            // EncryptLog::create([
-            //     'text' => $text,
-            //     'result' => $out,
-            //     'mode' => $mode,
-            // ]);
+            EncryptLog::create([
+                'text' => $text,
+                'result' => $out,
+                'mode' => $mode,
+            ]);
 
             return response()->json($payload);
         } elseif ($mode === 'from_widal') {
