@@ -1,0 +1,116 @@
+{
+	"info": {
+		"_postman_id": "2a90a8bc-b4ce-4f80-b26f-0e0981a22035",
+		"name": "Widal API Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "11796132"
+	},
+	"item": [
+		{
+			"name": "Encode w/o Reversal",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}?mode=to_widal&text=lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus sodales est nec vestibulum posuere. Integer sodales ullamcorper sem, ac ultricies nunc congue nec. Praesent ac mollis arcu.",
+					"host": [
+						"{{base_url}}"
+					],
+					"query": [
+						{
+							"key": "mode",
+							"value": "to_widal"
+						},
+						{
+							"key": "text",
+							"value": "lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus sodales est nec vestibulum posuere. Integer sodales ullamcorper sem, ac ultricies nunc congue nec. Praesent ac mollis arcu."
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Encode w/ Reversal",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}?mode=to_widal&text=lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus sodales est nec vestibulum posuere. Integer sodales ullamcorper sem, ac ultricies nunc congue nec. Praesent ac mollis arcu.&reversal=1",
+					"host": [
+						"{{base_url}}"
+					],
+					"query": [
+						{
+							"key": "mode",
+							"value": "to_widal"
+						},
+						{
+							"key": "text",
+							"value": "lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus sodales est nec vestibulum posuere. Integer sodales ullamcorper sem, ac ultricies nunc congue nec. Praesent ac mollis arcu."
+						},
+						{
+							"key": "reversal",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Decode",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}?mode=from_widal&text=roley nyidguy porol giw nyayew, jokgejwewul nyapidigji(ny) nyeriw. dbagerrug gopareg nyegw kej degwihuruy dogunyele. nyikwesel gopareg nyurrayjoldel gey, nyaj nyurwlijinyeg kukj jo(ny)unye kej. dlanyegekw nyaj yorrig nyalju.",
+					"host": [
+						"{{base_url}}"
+					],
+					"query": [
+						{
+							"key": "mode",
+							"value": "from_widal"
+						},
+						{
+							"key": "text",
+							"value": "roley nyidguy porol giw nyayew, jokgejwewul nyapidigji(ny) nyeriw. dbagerrug gopareg nyegw kej degwihuruy dogunyele. nyikwesel gopareg nyurrayjoldel gey, nyaj nyurwlijinyeg kukj jo(ny)unye kej. dlanyegekw nyaj yorrig nyalju."
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "localhost:8000/api/widal"
+		}
+	]
+}
