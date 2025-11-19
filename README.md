@@ -72,7 +72,7 @@ mode=from_widal&text=roley nyidguy porol giw nyayew, jokgejwewul nyapidigji(ny) 
 ## Laravel
 1. Clone repository
 ```bash
-git clone https://github.com/yourusername/widal-api.git
+git clone https://github.com/zhoeryamh/widal-api.git
 ```
 2. Install dependencies
 ```bash
