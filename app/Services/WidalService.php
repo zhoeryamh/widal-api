@@ -7,16 +7,18 @@ use Illuminate\Support\Facades\Log;
 class WidalService
 {
     protected array $map;
+    protected array $mapReverse;
+    protected array $mapDecode;
     protected array $vowelShort;
-    protected array $ambiguousMap;
-    // Digraf
     protected array $digraphs = ['NG','NY','EU'];
-    // Huruf Vokal Basa Sunda
     protected array $vowels = ['A','I','U','E','É','EU','O'];
+
+    // Ubah ke true jika ingin menyimpan log ke storage
+    protected bool $enableLog = false;
 
     public function __construct()
     {
-        // Mapping huruf
+        // Mapping huruf non-reversal
         $this->map = [
             'A'   => 'NYA',
             'B'  => 'H',
@@ -50,6 +52,7 @@ class WidalService
             'EU'  => 'NYEU',
         ];
 
+        // Mapping huruf reversal
         $this->mapReverse = [
             'A'   => 'NYA',
             'B'  => 'H',
@@ -83,17 +86,51 @@ class WidalService
             'EU'  => 'NYEU',
         ];
 
-        // Mapping huruf ambigu
-        $this->ambiguousMap = [
-            // J/Z -> C
-            'J' => 'C', 'Z' => 'C', 'C' => 'J',
-            // P/V/F -> D
-            'P' => 'D', 'V' => 'D', 'F' => 'D', 'D' => 'P',
-            // K/X/Q -> N
-            'K' => 'N', 'X' => 'N', 'Q' => 'N', 'N' => 'K',
+        $this->mapDecode = [
+            'NYA' => 'A',
+            'H' => 'B',
+            'J' => 'C',
+            'P' => 'D',
+            'NYE' => 'E',
+            'D' => 'P',
+            'S' => 'G',
+            'B' => 'H',
+            'NYI' => 'I',
+            'C' => 'J',
+            'N' => 'K',
+            'R' => 'L',
+            'Y' => 'M',
+            'K' => 'N',
+            'NYO' => 'O',
+            'L' => 'R',
+            'G' => 'S',
+            'W' => 'T',
+            'NYU' => 'U',
+            'T' => 'W',
+            'M' => 'Y',
+            'NY' => 'NG',
+            'NG' => 'NY',
+            'NYÉ' => 'É',
+            'NYEU' => 'EU',
+            '(NYA)' => 'NGA',
+            '(NYI)' => 'NGI',
+            '(NYU)' => 'NGU',
+            '(NYE)' => 'NGE',
+            '(NYÉ)' => 'NGÉ',
+            '(NYO)' => 'NGO',
+            '(NYEU)' => 'NGEU',
+            '(NY)' => 'NG',
+            '(NG)' => 'NY',
+            'NGA' => 'NYA',
+            'NGI' => 'NYI',
+            'NGU' => 'NYU',
+            'NGE' => 'NYE',
+            'NGÉ' => 'NYÉ',
+            'NGO' => 'NYO',
+            'NGEU' => 'NYEU',
         ];
 
-        // Mapping huruf vokal
+        // Mapping huruf vokal non-reversal
         $this->vowelShort = [
             'NYA'  => 'A',
             'NYI'  => 'I',
@@ -102,25 +139,6 @@ class WidalService
             'NYÉ'  => 'É',
             'NYO'  => 'O',
             'NYEU' => 'EU',
-        ];
-
-        $this->vowelShortReverse = [
-            "(NYA)"  => 'NGA',
-            "(NYI)"  => 'NGI',
-            "(NYU)"  => 'NGU',
-            "(NYE)"  => 'NGE',
-            "(NYÉ)"  => 'NGÉ',
-            "(NYO)"  => 'NGO',
-            "(NYEU)" => 'NGEU',
-            '(NY)' => "NG",
-            '(NG)' => "NY",
-            'NGA'  => 'NYA',
-            'NGI'  => 'NYI',
-            'NGU'  => 'NYU',
-            'NGE'  => 'NYE',
-            'NGÉ'  => 'NYÉ',
-            'NGO'  => 'NYO',
-            'NGEU' => 'NYEU',
         ];
     }
 
@@ -141,95 +159,82 @@ class WidalService
 
         // Tokenisasi huruf
         $tokens = $this->tokenizeDigraphsAndAccents($original);
-        $countTokens = count($tokens);
+        if ($this->enableLog) Log::info("-==========-");
+        if ($this->enableLog) Log::info("This string has these tokens [".implode(',', $tokens)."]");
+        if ($this->enableLog) Log::info("-==========-");
 
-        $outParts = [];
-        $prefixNY = false;
+        $outputPart = [];
 
         // Looping token untuk mapping huruf
-        for ($index = 0; $index < $countTokens; $index++) {
-            // Token
-            $token = $tokens[$index];
+        foreach ($tokens as $key => $value) {
+            $token = $value;
+
+            // Skip jika huruf tidak ada di map
+            if (!isset($this->map[$token]) || !isset($this->mapReverse[$token])) {
+                $outputPart[] = $token;
+                if ($this->enableLog) Log::info("[{$key}] Token '{$token}' isn't in this dictionary.");
+                continue;
+            }
 
             if ($reversal) {
-                if (!isset($this->mapReverse[$token])) {
-                    $outParts[] = $token;
-                    continue;
-                }
-
-                // Mapping huruf
+                // Mapping huruf jika menggunakan reversal
                 $mapped = $this->mapReverse[$token];
             } else {
-                if (!isset($this->map[$token])) {
-                    $outParts[] = $token;
-                    continue;
-                }
-
-                // Mapping huruf
+                // Mapping huruf tanpa menggunakan reversal
                 $mapped = $this->map[$token];
             }
+            if ($this->enableLog) Log::info("[{$key}] First try mapping for token '{$token}' is '{$mapped}'.");
 
             // Jika token adalah huruf vokal
             if ($this->isVowelToken($token)) {
-                // Jika token adalah huruf vokal pertama
-                // if ($index === 0) {
-                //     $prefixNY = true;
-                //     $outParts[] = $this->vowelShort[$mapped] ?? $mapped;
-                //     continue;
-                // }
-                if ($this->isWordStart($tokens, $index)) {
-                    $outParts[] = 'NY';
-                    $outParts[] = $this->vowelShort[$mapped] ?? $mapped;
+                if ($this->enableLog) Log::info("[{$key}] Because '{$token}' is Vowels, so it's remapped.");
+
+                // Jika token adalah huruf vokal pertama maka gunakan "NY"
+                if ($this->isWordStart($tokens, $key)) {
+                    $outputPart[] = 'NY';
+                    $outputPart[] = $this->vowelShort[$mapped] ?? $mapped;
+                    if ($this->enableLog) Log::info("[{$key}] Token '{$token}' is the first vowel in this word, so it's remapped into '".$this->vowelShort[$mapped] ?? $mapped."'");
                     continue;
                 }
 
-                // Jika token adalah huruf vokal kedua
-                $prev = $tokens[$index - 1];
+                // Jika token sebelumnya huruf vokal maka gunakan "NY"
+                $prev = $tokens[$key - 1];
                 if ($this->isVowelToken($prev)) {
-                    $outParts[] = $mapped;
+                    $outputPart[] = $mapped;
+                    if ($this->enableLog) Log::info("[{$key}] Because previous token '{$prev}' is a vowels, so it's remapped into {$mapped}");
                     continue;
                 }
 
-                // Jika token adalah huruf vokal terakhir
-                if ($index === $countTokens - 1) {
-                    // previous token already checked above: if prev is vowel we would have taken mapped
-                    // so reaching here means prev is NOT vowel -> emit short letter
-                    $outParts[] = $this->vowelShort[$mapped] ?? $mapped;
+                // Handler jika huruf terakhir tidak termapping
+                if ($key === count($tokens) - 1) {
+                    $outputPart[] = $this->vowelShort[$mapped] ?? $mapped;
+                    if ($this->enableLog) Log::info("[{$key}][EX] Because previous token '{$prev}' is not a vowels, so it's not remapped");
                     continue;
                 }
 
                 // Jika token adalah huruf vokal di antara konsonan
-                $outParts[] = $this->vowelShort[$mapped] ?? $mapped;
+                $outputPart[] = $this->vowelShort[$mapped] ?? $mapped;
+                if ($this->enableLog) Log::info("[{$key}] Because previous token is not a vowels, so it's not remapped");
                 continue;
             }
 
             // Jika token adalah konsonan / digraf
-            $outParts[] = $mapped;
+            $outputPart[] = $mapped;
         }
 
-        $out = implode('', $outParts);
-
-        // Jika string dimulai dengan huruf vokal, tambahkan 'NY' (menghindari double NY di awal)
-        if ($prefixNY) {
-            if (mb_substr($out, 0, 2, 'UTF-8') === 'NY') {
-                $out = 'NY' . mb_substr($out, 2, null, 'UTF-8');
-            } else {
-                $out = 'NY' . $out;
-            }
-        }
+        // Gabungkan semua bagian hasil mapping
+        $output = implode('', $outputPart);
 
         // Hapus 'NYNY' -> 'NY'
-        $out = str_replace([
+        $output = str_replace([
             'NYNY',
-            // 'ONYÉ',
-            // 'ONYE',
         ], [
             'NY',
-            // 'OÉ',
-            // 'OE',
-        ], $out);
+        ], $output);
 
-        return mb_strtolower($out, 'UTF-8');
+        if ($this->enableLog) Log::info("The result of this string remapping is '{$output}'");
+        if ($this->enableLog) Log::info("-==========-");
+        return mb_strtolower($output, 'UTF-8');
     }
 
     /**
@@ -247,54 +252,27 @@ class WidalService
 
         // Tokenisasi huruf
         $tokens = $this->tokenizeForDecode($string);
-
-        // Jika token awal adalah 'NY' dan token kedua adalah huruf vokal
-        if (isset($tokens[0]) && $tokens[0] === 'NY' && isset($tokens[1])) {
-            // Jika token kedua adalah huruf vokal
-            $shortVowels = array_keys($this->vowelShortReverse);
-            if (in_array($tokens[1], $shortVowels, true)) {
-                // Hapus token awal 'NY'
-                array_shift($tokens);
-                $startedWithVowel = true;
-            } else {
-                $startedWithVowel = false;
-            }
-        } else {
-            $startedWithVowel = false;
-        }
-
-        $reverse = [];
-
-        // Membuat reverse map
-        foreach ($this->map as $orig => $out) {
-            // Jika output ada di reverse map
-            $reverse[$out][] = $orig;
-        }
-
-        // Menghilangkan ambigu
-        foreach($reverse as $key => $value) {
-            if (in_array($key, $this->ambiguousMap, true)) {
-                $reverse[$key] = $this->ambiguousMap[$key];
-            }
-        }
-
-        // Menambahkan reverse entries untuk huruf vokal pendek
-        foreach ($this->vowelShortReverse as $nyv => $short) {
-            // Jika output ada di reverse map
-            $reverse[$nyv][] = $short;
-        }
+        if ($this->enableLog) Log::info("-==========-");
+        if ($this->enableLog) Log::info("This string has these tokens [".implode(',', $tokens)."]");
+        if ($this->enableLog) Log::info("-==========-");
 
         // Membuat decoded
         $decoded = [];
 
-        foreach ($tokens as $pos => $tok) {
-            if (isset($reverse[$tok])) {
-                $cands = $reverse[$tok];
-                $decoded[] = $cands[0];
-            } else {
-                // Jika token tidak ada di reverse map (punctuation, digits, unknown) - pass through
-                $decoded[] = $tok;
+        // Looping token untuk mapping huruf
+        foreach ($tokens as $key => $value) {
+            $token = $value;
+
+            // Skip jika huruf tidak ada di map
+            if (!isset($this->mapDecode[$token])) {
+                $decoded[] = $token;
+                if ($this->enableLog) Log::info("[{$key}] Token '{$token}' isn't in this dictionary.");
+                continue;
             }
+
+            $mapped = $this->mapDecode[$token];
+
+            $decoded[] = $mapped;
         }
 
         // Membuat string

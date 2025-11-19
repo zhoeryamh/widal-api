@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 // Models
-// use App\Models\EncryptLog;
-// use App\Models\DecryptLog;
+use App\Models\EncryptLog;
+use App\Models\DecryptLog;
 
 // Services
 use App\Services\WidalService;
@@ -16,6 +16,11 @@ use App\Services\WidalService;
 class WidalController extends Controller
 {
     protected WidalService $widal;
+
+    // Ubah ke true jika ingin menyimpan log ke database
+    // Pastikan tabel encrypt_logs dan decrypt_logs sudah di migrate
+    // Jalankan: php artisan migrate
+    protected bool $enableLog = false;
     
     public function __construct(WidalService $widal)
     {
@@ -44,11 +49,14 @@ class WidalController extends Controller
                 'result' => $out,
                 'mode' => $mode,
             ];
-            // EncryptLog::create([
-            //     'text' => $text,
-            //     'result' => $out,
-            //     'mode' => $mode,
-            // ]);
+
+            if ($this->enableLog) {
+                EncryptLog::create([
+                    'text' => $text,
+                    'result' => $out,
+                    'mode' => $mode,
+                ]);
+            }
 
             return response()->json($payload);
         } elseif ($mode === 'from_widal') {
@@ -58,11 +66,14 @@ class WidalController extends Controller
                 'result' => $out,
                 'mode' => $mode,
             ];
-            // DecryptLog::create([
-            //     'text' => $text,
-            //     'result' => $out,
-            //     'mode' => $mode,
-            // ]);
+
+            if ($this->enableLog) {
+                DecryptLog::create([
+                    'text' => $text,
+                    'result' => $out,
+                    'mode' => $mode,
+                ]);
+            }
 
             return response()->json($payload);
         }
