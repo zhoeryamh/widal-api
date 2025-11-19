@@ -172,8 +172,13 @@ class WidalService
             // Jika token adalah huruf vokal
             if ($this->isVowelToken($token)) {
                 // Jika token adalah huruf vokal pertama
-                if ($index === 0) {
-                    $prefixNY = true;
+                // if ($index === 0) {
+                //     $prefixNY = true;
+                //     $outParts[] = $this->vowelShort[$mapped] ?? $mapped;
+                //     continue;
+                // }
+                if ($this->isWordStart($tokens, $index)) {
+                    $outParts[] = 'NY';
                     $outParts[] = $this->vowelShort[$mapped] ?? $mapped;
                     continue;
                 }
@@ -380,5 +385,15 @@ class WidalService
     protected function isVowelToken(string $t): bool
     {
         return in_array($t, $this->vowels, true);
+    }
+
+    protected function isWordStart(array $tokens, int $i): bool
+    {
+        if ($i === 0) return true;
+        $prev = $tokens[$i - 1];
+        if (preg_match('/\p{L}/u', $prev) === 1) {
+            return false;
+        }
+        return true;
     }
 }
