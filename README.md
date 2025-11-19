@@ -67,6 +67,12 @@ mode=from_widal&text=roley nyidguy porol giw nyayew, jokgejwewul nyapidigji(ny) 
 }
 ```
 
+# Requirements
+
+## Laravel 10
+- PHP >= 8.0
+- Composer
+
 # Deployment
 
 ## Laravel
